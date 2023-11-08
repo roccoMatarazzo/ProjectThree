@@ -1,0 +1,79 @@
+---
+title: "Diabetes Data Analysis"
+author: "Rocco Matarazzo & Karthik Edupuganti"
+date: "`r Sys.Date()`"
+output: 
+  github_document
+params:
+  eduLevel: No School
+---
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+# Calling basic libraries
+library(readr)
+library(tidyverse)
+library(rmarkdown)
+
+# set ProjectThree Repo as your working directory first
+diabetes <- as_tibble(read_csv("diabetes_binary_health_indicators_BRFSS2015 (1).csv"))
+
+
+# Education levels from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/discussion/295407
+# 1 Never attended school or only kindergarten
+# 2 Grades 1 through 8 (Elementary)
+# 3 Grades 9 through 11 (Some high school)
+# 4 Grade 12 or GED (High school graduate)
+# 5 College 1 year to 3 years (Some college or technical school)
+# 6 College 4 years or more (College graduate)
+# 9 Refused (All these records were deleted from the dataset)
+```
+```{r}
+
+diabetes_full <- 
+  diabetes %>% 
+   mutate(EduLevel_Char = case_when(
+    Education == 1 ~ "No School",
+    Education == 2 ~ "Elementary",
+    Education == 3 ~ "Some High School",
+    Education == 4 ~ "High School Graduate",
+    Education == 5 ~ "Some College",
+    Education == 6 ~ "College Graduate"
+  )
+)
+
+markdown_data <- diabetes_full %>% filter(EduLevel_Char == params$eduLevel)
+
+head(markdown_data$EduLevel_Char)
+
+```
+
+
+```{r, eval=FALSE}
+# Setting Education Levels vector
+education_levels <- (c("No School", # dataset value = 1
+                      "Elementary", # dataset value = 2
+                      "Some High School", # dataset value = 3
+                      "High School Graduate", # dataset value = 4
+                      "Some College", # dataset value = 5
+                      "College Graduate")) # dataset value = 6
+
+# adding the .html to each
+output_file <- paste0(education_levels, ".md")
+
+params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
+
+# finalizing and combining it in a tibble
+reports <- tibble(output_file, params)
+
+# now we can apply! 
+apply(reports, MARGIN = 1,
+      FUN = function(x){
+        render(input = "Project3_Main_File.rmd",
+               output_file = x[[1]],
+               output_format = "github_document",
+               params = x[[2]])
+      })
+```
+
