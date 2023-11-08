@@ -1,12 +1,29 @@
-# ProjectThree
-This repo holds the data, code, and results of Project #3 in the Data Science for Statisticians course at North Carolina State University.
+Diabetes Data Analysis
+================
+Rocco Matarazzo & Karthik Edupuganti
+2023-11-08
 
-The R Packages used are as follows:  
-- readr
-- tidyverse
-- rmarkdown
+``` r
+diabetes_full <- 
+  diabetes %>% 
+   mutate(EduLevel_Char = case_when(
+    Education == 1 ~ "No School",
+    Education == 2 ~ "Elementary",
+    Education == 3 ~ "Some High School",
+    Education == 4 ~ "High School Graduate",
+    Education == 5 ~ "Some College",
+    Education == 6 ~ "College Graduate"
+  )
+)
 
-The code used to render five individual reports based on parameters is as follows:
+markdown_data <- diabetes_full %>% filter(EduLevel_Char == params$eduLevel)
+
+head(markdown_data$EduLevel_Char)
+```
+
+    ## [1] "Elementary" "Elementary" "Elementary" "Elementary" "Elementary" "Elementary"
+
+``` r
 # Setting Education Levels vector
 education_levels <- (c("No School", # dataset value = 1
                       "Elementary", # dataset value = 2
@@ -31,5 +48,4 @@ apply(reports, MARGIN = 1,
                output_format = "github_document",
                params = x[[2]])
       })
-
-The analysis for the following files are...
+```

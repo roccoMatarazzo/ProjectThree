@@ -3,7 +3,8 @@ title: "Diabetes Data Analysis"
 author: "Rocco Matarazzo & Karthik Edupuganti"
 date: "`r Sys.Date()`"
 output: 
-  github_document
+  github_document:
+      html_preview: false
 params:
   eduLevel: No School
 ---
