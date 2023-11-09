@@ -16,6 +16,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(readr)
 library(tidyverse)
 library(rmarkdown)
+library(caret)
+library(rsample)
 
 # set ProjectThree Repo as your working directory first
 diabetes <- as_tibble(read_csv("diabetes_binary_health_indicators_BRFSS2015 (1).csv"))
