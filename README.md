@@ -5,6 +5,8 @@ The R Packages used are as follows:
 - readr
 - tidyverse
 - rmarkdown
+- caret
+- rsample
 
 The code used to render five individual reports based on parameters is as follows:
 # Setting Education Levels vector
