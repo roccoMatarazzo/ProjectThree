@@ -18,6 +18,8 @@ library(tidyverse)
 library(rmarkdown)
 library(caret)
 library(rsample)
+library(naivebayes)
+library(MASS)
 
 # Education levels from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/discussion/295407
 # 1 Never attended school or only kindergarten
@@ -37,7 +39,7 @@ library(rsample)
 This report serves as an analysis on 2015 dataset with over 250,000 survey responses pertaining to diabetes. The main variable of interest is a binary indicator for diabetes where 1 represents diabetes/prediabetes and 0 represents no diabetes. 
 
 ##### TO DO FOR THIS SECTION:
-Briefly disscuss more aobut variables/dataset.
+Briefly discuss more about variables/dataset.
 Other variables that supplement our analysis are...*add description for our variables here*
 
 *describes the purpose of your EDA and modeling, along with the end result you will be creating.*
@@ -69,12 +71,12 @@ diabetes_full <-
   # Income
   Income_Char = case_when(
     Income == 1 ~"< $10,000",
-    Income == 2 ~"$10,000 <= Income < $15,000"
-    Income == 3 ~"$15,000 <= Income < $20,000"
-    Income == 4 ~"$20,000 <= Income < $25,000"
-    Income == 5 ~"$25,000 <= Income < $35,000"
-    Income == 6 ~"$35,000 <= Income < $50,000"
-    Income == 7 ~"$50,000 <= Income < $75,000"
+    Income == 2 ~"$10,000 <= Income < $15,000",
+    Income == 3 ~"$15,000 <= Income < $20,000",
+    Income == 4 ~"$20,000 <= Income < $25,000",
+    Income == 5 ~"$25,000 <= Income < $35,000",
+    Income == 6 ~"$35,000 <= Income < $50,000",
+    Income == 7 ~"$50,000 <= Income < $75,000",
     Income == 8 ~"> $75,000"
 ),
     # Age
@@ -99,10 +101,19 @@ diabetes_full <-
 # Subsetting the data down on param. of interest for particular analysis
 markdown_data <- diabetes_full %>% filter(EduLevel_Char == params$eduLevel)
 
+# Adding labels to diabetes binary variable and then factoring it.
+markdown_data$Diabetes_binary <- ifelse(markdown_data$Diabetes_binary == 0, "No", "Yes")
+markdown_data$Diabetes_binary <- factor(markdown_data$Diabetes_binary)
 ```
 
 # Summarizations 
 This section is where we will begin Exploratory Data Analysis (EDA). There are several techniques when conducting an EDA, including finding summary statistics and plotting various items from the dataset to potentially identify patterns or relationships within the data.
+
+
+```{r}
+markdown_data
+```
+The variables we will select are HighBP, HighChol, BMI, PhysActivity, Fruits, Veggies, Sex, Age, Smoker and Stroke
 
 
 # Modeling
@@ -121,6 +132,7 @@ In this section we will fit several models on our dataset with the predictor bei
 # Set seed for reproducible purposes
 set.seed(1234)
 
+
 # p = 0.70 at the end implies 70% of data goes into the training set
 trainingIndex <- createDataPartition(markdown_data$Diabetes_binary, p=0.70, list=FALSE)
 
@@ -135,17 +147,56 @@ test <- markdown_data[-trainingIndex,]
 
 ### Logistic Regression
 
+```{r}
+ctrl <- trainControl(method = "cv", classProbs = TRUE, number = 5, summaryFunction = mnLogLoss)
+
+logistic_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+
+
+```
+
+
 ### LASSO Regression
+
+```{r}
+lasso_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glmnet", tuneGrid = expand.grid(alpha = 1, lambda = seq(0, 1, by = 0.1)), trControl = ctrl, metric = "logLoss")
+
+```
 
 ### Classification Tree
 
+```{r}
+classification_tree_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rpart", tuneGrid = expand.grid(cp = seq(0,1, by = 0.001)), trControl = ctrl, metric = "logLoss")
+```
+
+
 ### Random Forest
+
+```{r}
+random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 1:10), trControl = ctrl, metric = "logLoss")
+```
+
 
 ### Non-Class Model #1
 
+```{r}
+naive_bayes_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "naive_bayes", trControl = ctrl, metric = "logLoss")
+```
+
 ### Non-Class Model #2
 
-# Final Model Selectoion
+
+```{r}
+lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "lda", trControl = ctrl, metric = "logLoss")
+```
+
+
+```{r}
+qda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "qda", trControl = ctrl, metric = "logLoss")
+```
+
+
+# Final Model Selection
 
 # Automation (Ignore for now)
 This is for rendering all five docs (ignore for now)
