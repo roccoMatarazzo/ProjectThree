@@ -6,7 +6,7 @@ output:
   github_document:
       html_preview: false
 params:
-  eduLevel: No School
+  eduLevel: Minimal Schooling
 ---
 
 ```{r libraries, include=FALSE}
@@ -50,6 +50,8 @@ If you are interested in more information about the dataset, please visit the fo
 
 Here we are reading in our data. First, we uploaded the data to our repo, set our repo as our working directory, then read the file using the read_csv() function. Also, to have a clearer understanding of the data we're working with, we used the dplyr package and mutate() function to recreate several of the categorical variables with string/character level names. 
 
+We combined the first group (No school/kindergarten) and the second group (Elementary level) into one group called "Minimal Schooling." This way we have 5 distinct groups.
+
 ```{r}
 
 # set Repo as your working directory first
@@ -61,8 +63,8 @@ diabetes_full <-
    mutate(
   # Education Level   
   EduLevel_Char = case_when(
-    Education == 1 ~ "No School",
-    Education == 2 ~ "Elementary",
+    Education == 1 ~ "Minimal Schooling",
+    Education == 2 ~ "Minimal Schooling",
     Education == 3 ~ "Some High School",
     Education == 4 ~ "High School Graduate",
     Education == 5 ~ "Some College",
@@ -201,29 +203,28 @@ qda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fr
 # Automation (Ignore for now)
 This is for rendering all five docs (ignore for now)
 ```{r, eval=FALSE}
-# # Setting Education Levels vector
-# education_levels <- (c("No School", # dataset value = 1
-#                       "Elementary", # dataset value = 2
-#                       "Some High School", # dataset value = 3
-#                       "High School Graduate", # dataset value = 4
-#                       "Some College", # dataset value = 5
-#                       "College Graduate")) # dataset value = 6
-# 
-# # adding the .html to each
-# output_file <- paste0(education_levels, ".md")
-# 
-# params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
-# 
-# # finalizing and combining it in a tibble
-# reports <- tibble(output_file, params)
-# 
-# # now we can apply! 
-# apply(reports, MARGIN = 1,
-#       FUN = function(x){
-#         render(input = "Project3_Main_File.rmd",
-#                output_file = x[[1]],
-#                output_format = "github_document",
-#                params = x[[2]])
-#       })
+# Setting Education Levels vector
+education_levels <- (c("Minimal Schooling", # dataset value = 1/2
+                      "Some High School", # dataset value = 3
+                      "High School Graduate", # dataset value = 4
+                      "Some College", # dataset value = 5
+                      "College Graduate")) # dataset value = 6
+
+# adding the .html to each
+output_file <- paste0(education_levels, ".md")
+
+params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
+
+# finalizing and combining it in a tibble
+reports <- tibble(output_file, params)
+
+# now we can apply! 
+apply(reports, MARGIN = 1,
+      FUN = function(x){
+        render(input = "Project3_Main_File.rmd",
+               output_file = x[[1]],
+               output_format = "github_document",
+               params = x[[2]])
+      })
 ```
 
