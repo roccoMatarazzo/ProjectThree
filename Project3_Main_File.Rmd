@@ -20,6 +20,7 @@ library(caret)
 library(rsample)
 library(naivebayes)
 library(MASS)
+library(ggcorrplot)
 
 # Education levels from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/discussion/295407
 # 1 Never attended school or only kindergarten
@@ -36,23 +37,27 @@ library(MASS)
 
 # Introduction
 
-This report serves as an analysis on 2015 dataset with over 250,000 survey responses pertaining to diabetes. The main variable of interest is a binary indicator for diabetes where 1 represents diabetes/prediabetes and 0 represents no diabetes. 
+This report serves as an analysis on 2015 dataset with over 250,000 survey responses pertaining to diabetes. The main variable of interest is a binary indicator for diabetes, of course, where 1 represents diabetes/prediabetes and 0 represents no diabetes. 
 
-##### TO DO FOR THIS SECTION:
-Briefly discuss more about variables/dataset.
-Other variables that supplement our analysis are...*add description for our variables here*
+Other variables that supplement our analysis include HighBP, HighChol, BMI, PhysActivity, Fruits, Veggies, Sex, Age, Smoker and Stroke. Each of these are binary variables, except for BMI and Age. BMI represents the individual's Body Mass Index, which can help identify potential health problems by using the person's height and weight. HighBP, HighChol, Smoker, and Stroke are each coded as 1 equals yes, and 0 equals no. For example, an individual that has a value of 1 in each of these categories has high blood pressure, high cholesterol, classifies as a smoker, and has had a stroke in their life. To classify as a smoker in this dataset, an individual must have smoked at least 100 cigarettes within their lifetime at the time of the survey. 
 
+Just as the variables listed above, PhysActivity, Fruits, and Veggies are another set of yes (1) and no (0) variables. PhysActivity represents whether or not the individual exercised within the last month at the time of survey, other than their regular job. Fruits and veggies determine whether the individual has at least one fruit or vegetable per day. A value of 1 in each of these categories would imply a rather healthy lifestyle. Finally, Sex represents the gender of the individual -- 1 for male and 0 for female -- and Age has several splits, but ultimately ranges from 18 years old to 80 or older. If you are interested in more information about the dataset, please visit the following [link.](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/)
+
+#### TO DO
 *describes the purpose of your EDA and modeling, along with the end result you will be creating.*
-
-If you are interested in more information about the dataset, please visit the following [link.](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/).
 
 # Data
 
 Here we are reading in our data. First, we uploaded the data to our repo, set our repo as our working directory, then read the file using the read_csv() function. Also, to have a clearer understanding of the data we're working with, we used the dplyr package and mutate() function to recreate several of the categorical variables with string/character level names. 
 
-We combined the first group (No school/kindergarten) and the second group (Elementary level) into one group called "Minimal Schooling." This way we have 5 distinct groups.
+We combined the first group (No school/kindergarten) and the second group (Elementary level) into one group called "Minimal Schooling." This way we have 5 distinct groups as follows:  
+- Minimal Schooling  
+- Some High School  
+- High School Graduate  
+- Some College  
+- College Graduate
 
-```{r}
+```{r, results=FALSE, message=FALSE, warning=FALSE}
 
 # set Repo as your working directory first
 diabetes <- as_tibble(read_csv("diabetes_binary_health_indicators_BRFSS2015 (1).csv"))
@@ -62,7 +67,7 @@ diabetes_full <-
   diabetes %>% 
    mutate(
   # Education Level   
-  EduLevel_Char = case_when(
+  Education = case_when(
     Education == 1 ~ "Minimal Schooling",
     Education == 2 ~ "Minimal Schooling",
     Education == 3 ~ "Some High School",
@@ -71,7 +76,7 @@ diabetes_full <-
     Education == 6 ~ "College Graduate"
   ),
   # Income
-  Income_Char = case_when(
+  Income = case_when(
     Income == 1 ~"< $10,000",
     Income == 2 ~"$10,000 <= Income < $15,000",
     Income == 3 ~"$15,000 <= Income < $20,000",
@@ -80,9 +85,9 @@ diabetes_full <-
     Income == 6 ~"$35,000 <= Income < $50,000",
     Income == 7 ~"$50,000 <= Income < $75,000",
     Income == 8 ~"> $75,000"
-),
+  ),
     # Age
-  Age_Char = case_when(
+  Age = case_when(
     Age == 1  ~ "Age 18 to 24",    
     Age == 2  ~ "Age 25 to 29",
     Age == 3  ~ "Age 30 to 34",    
@@ -96,31 +101,102 @@ diabetes_full <-
     Age == 11 ~ "Age 70 to 74",    
     Age == 12 ~ "Age 75 to 79",
     Age == 13 ~ "Age 80 or older"
-),
-
-
+  ),
+  # High Blood Pressure
+  HighBP = case_when(
+    HighBP == 1 ~ "Yes",
+    HighBP == 0 ~ "No"
+  ), 
+  # High Cholesterol
+  HighChol = case_when(
+    HighChol == 1 ~ "Yes",
+    HighChol == 0 ~ "No"
+  ), 
+  # Physical Activity
+  PhysActivity = case_when(
+    PhysActivity == 1 ~ "Yes",
+    PhysActivity == 0 ~ "No"
+  ), 
+  # Fruits
+  Fruits = case_when(
+    Fruits == 1 ~ "At least one piece of fruit per day",
+    Fruits == 0 ~ "Diet contains no fruits"
+  ), 
+  # Vegetables
+  Veggies = case_when(
+    Veggies == 1 ~ "At least one vegetable per day",
+    Veggies == 0 ~ "Diet contains no vegetables"
+  ),
+  # Sex
+  Sex = case_when(
+    Sex == 1 ~ "Male",
+    Sex == 2 ~ "Female"
+  ), 
+  # Smoker
+  Smoker = case_when(
+    Smoker == 1 ~ "Yes",
+    Smoker == 0 ~ "No"
+  ),
+  # Stroke
+  Stroke = case_when(
+    Stroke == 1 ~ "Yes",
+    Stroke == 0 ~ "No"
+  ),
+  Diabetes_binary = case_when(
+    Diabetes_binary == 1 ~ "Yes",
+    Diabetes_binary == 0 ~ "No"
+  )
 )
 # Subsetting the data down on param. of interest for particular analysis
-markdown_data <- diabetes_full %>% filter(EduLevel_Char == params$eduLevel)
+markdown_data <- diabetes_full %>% filter(Education == params$eduLevel)
 
-# Adding labels to diabetes binary variable and then factoring it.
-markdown_data$Diabetes_binary <- ifelse(markdown_data$Diabetes_binary == 0, "No", "Yes")
+# Converting all variables to factors
+markdown_data$Income <- factor(markdown_data$Income)
+markdown_data$Age <- factor(markdown_data$Age)
+markdown_data$HighBP <- factor(markdown_data$HighBP)
+markdown_data$HighChol <- factor(markdown_data$HighChol)
+markdown_data$PhysActivity <- factor(markdown_data$PhysActivity)
+markdown_data$Fruits <- factor(markdown_data$Fruits)
+markdown_data$Veggies <- factor(markdown_data$Veggies)
+markdown_data$Sex <- factor(markdown_data$Sex)
+markdown_data$Smoker <- factor(markdown_data$Smoker)
+markdown_data$Stroke <- factor(markdown_data$Stroke)
 markdown_data$Diabetes_binary <- factor(markdown_data$Diabetes_binary)
+
 ```
 
 # Summarizations 
 This section is where we will begin Exploratory Data Analysis (EDA). There are several techniques when conducting an EDA, including finding summary statistics and plotting various items from the dataset to potentially identify patterns or relationships within the data.
 
+### Contingency Tables
+First let's focus on HighBP, HighChol, Smoker, and Stroke. All four of these variables can imply poor health in comparison to not being associated with these variables.
 
 ```{r}
-markdown_data
-```
-The variables we will select are HighBP, HighChol, BMI, PhysActivity, Fruits, Veggies, Sex, Age, Smoker and Stroke
+table(markdown_data$HighChol, markdown_data$HighBP, markdown_data$Diabetes_binary,  
+      dnn = c("HighChol", "HighBP", "Diabetes"))
 
+
+table(markdown_data$Stroke, markdown_data$Smoker, markdown_data$Diabetes_binary,  
+      dnn = c("Stroke", "Smoker", "Diabetes"))
+```
+
+### Plots
+Next, let's investigate BMI versus whether or not a person has diabetes. A higher BMI can indicate high body fat, which can lead to health problems such as diabetes. 
+
+```{r}
+
+ggplot(markdown_data, aes(x=Diabetes_binary, y=BMI)) + 
+  geom_point() +
+  xlab("Diabetes") +
+  ylab("Body Mass Index (BMI)") +
+  theme_bw() 
+
+```
 
 # Modeling
 
 In this section we will fit several models on our dataset with the predictor being the aforementioned binary diabetes variable. First, we'll split our data into a training and testing set. 
+
 ```{r}
 # # set seed for reproducible purposes
 # set.seed(1234)
@@ -145,21 +221,33 @@ test <- markdown_data[-trainingIndex,]
 ```
 
 ### Log Loss
-*there is stuff on the discussion board about this*
+
+Log Loss is one of many metrics available to evaluate classification models. The lower the Log Loss, the better predictability a model has. A classification model will compute the probability that given a set of variables, how likely is it that this set belongs to the diabetes or no diabetes class. Therefore, the farther our predicted probability is from the observed class (0 or 1), the higher the Log Loss. 
+
+We may prefer Log Loss to accuracy given it's more complex relation with the entire model. Accuracy simply determines how well our model classified data correctly and only cares about the observed class. Accuracy does not take into account the probability/uncertainty associated with the prediction like Log Loss does. 
 
 ### Logistic Regression
+*would like to improve this section*
+Logistic Regression is a very reasonable choice for our analysis. This is because of the nature of our target variable being binary. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. 
 
 ```{r}
 ctrl <- trainControl(method = "cv", classProbs = TRUE, number = 5, summaryFunction = mnLogLoss)
 
-logistic_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+# Model 1, all variables
+logistic_model_1 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
 
+# Model 2, removing Fruits, Veggies, and Stroke
+logistic_model_2 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Sex + Age + Smoker, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+
+# Model 3, adding interactions
+logistic_model_3 <- train(Diabetes_binary ~ HighBP + HighChol + BMI*PhysActivity + Age*Sex + Smoker*Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
 
 ```
 
 
 ### LASSO Regression
-
+*section unfinished*
+LASSO regression uses shrinkage methods in an attempt to improve predictions.
 ```{r}
 lasso_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glmnet", tuneGrid = expand.grid(alpha = 1, lambda = seq(0, 1, by = 0.1)), trControl = ctrl, metric = "logLoss")
 
@@ -167,12 +255,16 @@ lasso_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + 
 
 ### Classification Tree
 
+A classification tree is used when our goal is to classify group membership, in this case, classify whether or not an individual has diabetes. Like any tree based method, a classifciation tree will split the predictor space into mny regions and have different predictions for each region. The tree is split by minimizing the Gini Coefficient, a number that repersents how well each node classifies. 
+
 ```{r}
 classification_tree_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rpart", tuneGrid = expand.grid(cp = seq(0,1, by = 0.001)), trControl = ctrl, metric = "logLoss")
 ```
 
 
 ### Random Forest
+
+A Random Forest creates multiple bagged trees then averages the results. For each tree a random subset of predictors is chosen to fit the tree. This way, a single strong predictor won't dominate the tree fits as it will be left out of some of the other trees by random chance. We might choose the Random Forest over the Classification Tree because the Random Forest is typically stronger in prediction. Due to averaging over a large number of tree fits the variance decreases and prediction improves.
 
 ```{r}
 random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 1:10), trControl = ctrl, metric = "logLoss")
@@ -197,34 +289,33 @@ lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fr
 qda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "qda", trControl = ctrl, metric = "logLoss")
 ```
 
-
 # Final Model Selection
 
 # Automation (Ignore for now)
 This is for rendering all five docs (ignore for now)
 ```{r, eval=FALSE}
-# Setting Education Levels vector
-education_levels <- (c("Minimal Schooling", # dataset value = 1/2
-                      "Some High School", # dataset value = 3
-                      "High School Graduate", # dataset value = 4
-                      "Some College", # dataset value = 5
-                      "College Graduate")) # dataset value = 6
-
-# adding the .html to each
-output_file <- paste0(education_levels, ".md")
-
-params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
-
-# finalizing and combining it in a tibble
-reports <- tibble(output_file, params)
-
-# now we can apply! 
-apply(reports, MARGIN = 1,
-      FUN = function(x){
-        render(input = "Project3_Main_File.rmd",
-               output_file = x[[1]],
-               output_format = "github_document",
-               params = x[[2]])
-      })
+# # Setting Education Levels vector
+# education_levels <- (c("Minimal Schooling", # dataset value = 1/2
+#                       "Some High School", # dataset value = 3
+#                       "High School Graduate", # dataset value = 4
+#                       "Some College", # dataset value = 5
+#                       "College Graduate")) # dataset value = 6
+# 
+# # adding the .html to each
+# output_file <- paste0(education_levels, ".md")
+# 
+# params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
+# 
+# # finalizing and combining it in a tibble
+# reports <- tibble(output_file, params)
+# 
+# # now we can apply! 
+# apply(reports, MARGIN = 1,
+#       FUN = function(x){
+#         render(input = "Project3_Main_File.rmd",
+#                output_file = x[[1]],
+#                output_format = "github_document",
+#                params = x[[2]])
+#       })
 ```
 
