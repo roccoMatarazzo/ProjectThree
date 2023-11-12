@@ -130,7 +130,7 @@ diabetes_full <-
   # Sex
   Sex = case_when(
     Sex == 1 ~ "Male",
-    Sex == 2 ~ "Female"
+    Sex == 0 ~ "Female"
   ), 
   # Smoker
   Smoker = case_when(
@@ -180,18 +180,55 @@ table(markdown_data$Stroke, markdown_data$Smoker, markdown_data$Diabetes_binary,
       dnn = c("Stroke", "Smoker", "Diabetes"))
 ```
 
+Next, we can explore the gender and age of the individual.
+```{r}
+table(markdown_data$Age, markdown_data$Diabetes_binary,  
+      dnn = c("Age", "Diabetes"))
+
+
+table(markdown_data$Sex, markdown_data$Diabetes_binary,  
+      dnn = c("Sex", "Diabetes"))
+```
+
+
 ### Plots
-Next, let's investigate BMI versus whether or not a person has diabetes. A higher BMI can indicate high body fat, which can lead to health problems such as diabetes. 
+Next, let's investigate BMI, whether or not a person has diabetes, and Age on a plot. A higher BMI can indicate high body fat, which can lead to health problems such as diabetes. 
 
 ```{r}
 
-ggplot(markdown_data, aes(x=Diabetes_binary, y=BMI)) + 
+ggplot(markdown_data, aes(x=BMI, y=Age, col=Diabetes_binary)) + 
   geom_point() +
-  xlab("Diabetes") +
-  ylab("Body Mass Index (BMI)") +
+  xlab("Body Mass Index (BMI)") +
+  ylab("Age") +
   theme_bw() 
 
 ```
+
+The next plot will display an individual's physical activity and dietary habits in relation to their BMI and whether or not they have diabetes. 
+
+```{r}
+
+ggplot(markdown_data, aes(x=BMI, y=PhysActivity, col=Diabetes_binary)) + 
+  geom_point() +
+  xlab("Body Mass Index (BMI)") +
+  ylab("Participates In Physical Activity") +
+  theme_bw() 
+
+ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) + 
+  geom_point() +
+  xlab("Body Mass Index (BMI)") +
+  ylab("Fruit Intake") +
+  theme_bw() 
+
+
+ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) + 
+  geom_point() +
+  xlab("Body Mass Index (BMI)") +
+  ylab("Vegetable Intake") +
+  theme_bw() 
+
+```
+
 
 # Modeling
 
@@ -230,6 +267,8 @@ We may prefer Log Loss to accuracy given it's more complex relation with the ent
 *would like to improve this section*
 Logistic Regression is a very reasonable choice for our analysis. This is because of the nature of our target variable being binary. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. 
 
+We fit three models here. The first includes all the variables of interest. The second model removes diet items such as the Fruits and Veggies variables, along with the Stroke variable. The third model includes interaction terms between Age and Sex, Smoker and Stroke, and BMI and PhysActivity.
+
 ```{r}
 ctrl <- trainControl(method = "cv", classProbs = TRUE, number = 5, summaryFunction = mnLogLoss)
 
@@ -241,6 +280,43 @@ logistic_model_2 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivi
 
 # Model 3, adding interactions
 logistic_model_3 <- train(Diabetes_binary ~ HighBP + HighChol + BMI*PhysActivity + Age*Sex + Smoker*Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+
+paste("The lowest log loss among these models is:",
+      round(min(
+logistic_model_1$results$logLoss,
+logistic_model_2$results$logLoss,
+logistic_model_3$results$logLoss), 4)
+      )
+
+
+if (min(
+logistic_model_1$results$logLoss,
+logistic_model_2$results$logLoss,
+logistic_model_3$results$logLoss)
+  ==
+logistic_model_1$results$logLoss
+) {
+  
+  logistic_best_model <- logistic_model_1
+  print("The best model here is model 1.")
+  
+} else if(min(
+logistic_model_1$results$logLoss,
+logistic_model_2$results$logLoss,
+logistic_model_3$results$logLoss)
+  ==
+logistic_model_2$results$logLoss
+) {
+  
+  logistic_best_model <- logistic_model_2
+  print("The best model here is model 2.")
+  
+} else {
+  
+  logistic_best_model <- logistic_model_3
+  print("The best model here is model 3.")
+  
+}
 
 ```
 
@@ -255,7 +331,7 @@ lasso_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + 
 
 ### Classification Tree
 
-A classification tree is used when our goal is to classify group membership, in this case, classify whether or not an individual has diabetes. Like any tree based method, a classifciation tree will split the predictor space into mny regions and have different predictions for each region. The tree is split by minimizing the Gini Coefficient, a number that repersents how well each node classifies. 
+A classification tree is used when our goal is to classify group membership, in this case, classify whether or not an individual has diabetes. Like any tree based method, a classification tree will split the predictor space into many regions and have different predictions for each region. The tree is split by minimizing the Gini Coefficient, a number that represents how well each node classifies. 
 
 ```{r}
 classification_tree_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rpart", tuneGrid = expand.grid(cp = seq(0,1, by = 0.001)), trControl = ctrl, metric = "logLoss")
@@ -279,17 +355,18 @@ naive_bayes_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActiv
 
 ### Non-Class Model #2
 
-
 ```{r}
 lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "lda", trControl = ctrl, metric = "logLoss")
 ```
 
 
+# Final Model Selection
+Here we will choose the best model based on RMSE.
+
 ```{r}
-qda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "qda", trControl = ctrl, metric = "logLoss")
+
 ```
 
-# Final Model Selection
 
 # Automation (Ignore for now)
 This is for rendering all five docs (ignore for now)
