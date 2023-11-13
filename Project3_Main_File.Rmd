@@ -265,7 +265,7 @@ We may prefer Log Loss to accuracy given it's more complex relation with the ent
 
 ### Logistic Regression
 *would like to improve this section*
-Logistic Regression is a very reasonable choice for our analysis. This is because of the nature of our target variable being binary. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. 
+Logistic Regression is primarily used in binary classification tasks where we are trying to classify a response variable with two outcomes. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. 
 
 We fit three models here. The first includes all the variables of interest. The second model removes diet items such as the Fruits and Veggies variables, along with the Stroke variable. The third model includes interaction terms between Age and Sex, Smoker and Stroke, and BMI and PhysActivity.
 
@@ -322,12 +322,13 @@ logistic_model_2$results$logLoss
 
 
 ### LASSO Regression
-*section unfinished*
-LASSO regression uses shrinkage methods in an attempt to improve predictions.
+
+LASSO regression stands for Least Absolute Shrinkage and Selection Operator. This method uses shrinkage methods in an attempt to improve predictions. Shrinkage is when values of data are shrunk towards some mean. The LASSO method estimates the regression coefficients by minimizing them for a lambda > 0. This is particularly used over regular logistic so that we can select models with fewer parameters as a simpler model with important variables is preferred over a complex model with large amount of variables.
+
 ```{r}
 lasso_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glmnet", tuneGrid = expand.grid(alpha = 1, lambda = seq(0, 1, by = 0.1)), trControl = ctrl, metric = "logLoss")
-
 ```
+
 
 ### Classification Tree
 
@@ -347,21 +348,29 @@ random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysAct
 ```
 
 
-### Non-Class Model #1
+### Non-Class Model #1 - Naive Bayes Classifer
+
+The Naive Bayes Classifier is a method based on Bayes theorem which assumes that predictors selected for a model are independent of each other. It is used in classification tasks which is why it is a suitable method here to predict if a person has diabetes or not. In the context of our problem it essentially predicts the probability of an observation having diabetes or not diabetes given specific predictor variables. 
+
 
 ```{r}
 naive_bayes_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "naive_bayes", trControl = ctrl, metric = "logLoss")
 ```
 
-### Non-Class Model #2
+
+### Non-Class Model #2 - Linear Discriminant Analysis
+
+Linear Discriminant Analysis essentially works by finding the best linear combination of features that separates the response variable's classes. We assume that the predictor variables have multivariate normal density with different mean vectors but same covariance matrix for each class in response variable. It can also be used as dimensionality reduction technique.
 
 ```{r}
 lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "lda", trControl = ctrl, metric = "logLoss")
 ```
 
 
+
+
 # Final Model Selection
-Here we will choose the best model based on RMSE.
+Here we will choose the best model based on Log Loss.
 
 ```{r}
 
