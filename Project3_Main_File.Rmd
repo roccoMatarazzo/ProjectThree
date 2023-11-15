@@ -419,16 +419,85 @@ lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fr
 ```
 
 # Final Model Selection
-Here we will choose the best model based on Log Loss.
+Here we will choose the best model based on misclassification rate. The model with the lowest misclassification rate is the chosen as the best model. 
 
 ```{r}
 # Make our predictions with test set
-LogisticPredicts <- predict(logistic_best_model, newdata = test)
-LassoPredicts <- predict(lasso_model, newdata = test)
-ClassTreePredicts <- predict(classification_tree_model, newdata = test)
-RandomForestPredicts <- predict(naive_bayes_model, newdata = test)
-LDAPredicts <- predict(lda_model, newdata = test)
+LogisticPredicts     <- predict(logistic_best_model, newdata = test)
+LassoPredicts        <- predict(lasso_model, newdata = test)
+ClassTreePredicts    <- predict(classification_tree_model, newdata = test)
+RandomForestPredicts <- predict(random_forest_model, newdata = test)
+BayesPredicts        <- predict(naive_bayes_model, newdata = test)
+LDAPredicts          <- predict(lda_model, newdata = test)
 
+# Making classification tables
+LogisticTable      <- table(LogisticPredicts, test$Diabetes_binary)
+LassoTable         <- table(LassoPredicts, test$Diabetes_binary)
+ClassTreeTable     <- table(ClassTreePredicts, test$Diabetes_binary)
+RandomForestTable  <- table(RandomForestPredicts, test$Diabetes_binary)
+BayesTable         <- table(BayesPredicts, test$Diabetes_binary)
+LDATable           <- table(LDAPredicts, test$Diabetes_binary)
+
+# Acquiring Misclassiifcation Rate
+LogisticMisclassRate     <- 1-sum(diag(LogisticTable))/sum(LogisticTable)
+LassoMisclassRate        <- 1-sum(diag(LassoTable))/sum(LassoTable)
+ClassTreeMisclassRate    <- 1-sum(diag(ClassTreeTable))/sum(ClassTreeTable)
+RandomForestMisclassRate <- 1-sum(diag(RandomForestTable))/sum(RandomForestTable)
+BayesMisclassRate        <- 1-sum(diag(BayesTable))/sum(BayesTable)
+LDAMisclassRate          <- 1-sum(diag(LDATable))/sum(LDATable)
+
+# Want to talk about this on call
+# Another Way to do Misclassification Rate
+# misclassification_rate <- mean(LDAPredicts != test$Diabetes_binary)
+
+# Combine Rats
+MisclassTotals <- 
+  rbind(LogisticMisclassRate,     
+      LassoMisclassRate,    
+      ClassTreeMisclassRate, 
+      RandomForestMisclassRate,
+      BayesMisclassRate,
+      LDAMisclassRate)
+
+smallestRate <- min(MisclassTotals[,1])
+
+if (smallestRate == MisclassTotals[1]) 
+  {
+  
+  final_model <- logistic_best_model
+  print("The final model is the Logisitc Regression Model.")
+  
+} else if(smallestRate == MisclassTotals[2]) 
+  {
+  
+  final_model <- lasso_model
+  print("The final model is the LASSO Regression Model.")
+  
+}  else if(smallestRate == MisclassTotals[3]) 
+  {
+  
+  final_model <- classification_tree_model
+  print("The final model is the Classification Tree Model.")
+  
+} else if(smallestRate == MisclassTotals[4]) 
+  {
+  
+  final_model <- random_forest_model
+  print("The final model is the Random Forest Model.")
+  
+} else if(smallestRate == MisclassTotals[5]) 
+  {
+  
+  final_model <- naive_bayes_model
+  print("The final model is the Naive Bayesian Model.")
+  
+} else if(smallestRate == MisclassTotals[6]) 
+  {
+  
+  final_model <- lda_model
+  print("The final model is the Linear Discriminant Analysis Model.")
+  
+}
 ```
 
 
