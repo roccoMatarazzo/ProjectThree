@@ -37,14 +37,20 @@ library(ggcorrplot)
 
 # Introduction
 
-This report serves as an analysis on 2015 dataset with over 250,000 survey responses pertaining to diabetes. The main variable of interest is a binary indicator for diabetes, of course, where 1 represents diabetes/prediabetes and 0 represents no diabetes. 
+This report serves as an analysis on 2015 dataset with over 250,000 survey responses pertaining to diabetes. The main variable of interest is a binary indicator for diabetes where 1 represents diabetes/prediabetes and 0 represents no diabetes. 
 
 Other variables that supplement our analysis include HighBP, HighChol, BMI, PhysActivity, Fruits, Veggies, Sex, Age, Smoker and Stroke. Each of these are binary variables, except for BMI and Age. BMI represents the individual's Body Mass Index, which can help identify potential health problems by using the person's height and weight. HighBP, HighChol, Smoker, and Stroke are each coded as 1 equals yes, and 0 equals no. For example, an individual that has a value of 1 in each of these categories has high blood pressure, high cholesterol, classifies as a smoker, and has had a stroke in their life. To classify as a smoker in this dataset, an individual must have smoked at least 100 cigarettes within their lifetime at the time of the survey. 
 
 Just as the variables listed above, PhysActivity, Fruits, and Veggies are another set of yes (1) and no (0) variables. PhysActivity represents whether or not the individual exercised within the last month at the time of survey, other than their regular job. Fruits and veggies determine whether the individual has at least one fruit or vegetable per day. A value of 1 in each of these categories would imply a rather healthy lifestyle. Finally, Sex represents the gender of the individual -- 1 for male and 0 for female -- and Age has several splits, but ultimately ranges from 18 years old to 80 or older. If you are interested in more information about the dataset, please visit the following [link.](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/)
 
-#### TO DO
+
+
+#### TO DO FINISH
 *describes the purpose of your EDA and modeling, along with the end result you will be creating.*
+
+Our Exploratory Data Analysis (EDA) attempts to discover patterns and relationships within our data among the variables of interest. It was difficult to create several distinct plots given the heavy number of categorical variables. Contingency tables and bar plots served crucial in this section. The modeling section explores several different options before settling on a final model. The final model is best in terms of predictive purposes. 
+
+The final output for this project is five individual analyses on each level of education, which are discussed further in the data section. 
 
 # Data
 
@@ -59,7 +65,7 @@ We combined the first group (No school/kindergarten) and the second group (Eleme
 
 ```{r, results=FALSE, message=FALSE, warning=FALSE}
 
-# set Repo as your working directory first
+# set Repo as your working directory first before running this code
 diabetes <- as_tibble(read_csv("diabetes_binary_health_indicators_BRFSS2015 (1).csv"))
 
 # Adding meaningful names to levels of variables
@@ -168,8 +174,22 @@ markdown_data$Diabetes_binary <- factor(markdown_data$Diabetes_binary)
 # Summarizations 
 This section is where we will begin Exploratory Data Analysis (EDA). There are several techniques when conducting an EDA, including finding summary statistics and plotting various items from the dataset to potentially identify patterns or relationships within the data.
 
+### Summary Statistics
+First, we will view summary statistics based on our dataset. The only numerical summary we can acquire from the dataset is for BMI. Every other variable is of the categorical nature.
+```{r}
+# Five Number Summary
+summary(markdown_data$BMI)
+
+# IQR (Q3-Q1)
+paste("The Interquartile Range (IQR) for BMI is:", round(IQR(markdown_data$BMI),3))
+
+# Std. Deviation
+paste("The Standard Deviation for BMI is:", round(sd(summary(markdown_data$BMI)),3))
+```
+
+
 ### Contingency Tables
-First let's focus on HighBP, HighChol, Smoker, and Stroke. All four of these variables can imply poor health in comparison to not being associated with these variables.
+This opening bit will focus on HighBP, HighChol, Smoker, and Stroke. All four of these variables can imply poor health in comparison to not being associated with these variables.
 
 ```{r}
 table(markdown_data$HighChol, markdown_data$HighBP, markdown_data$Diabetes_binary,  
@@ -180,14 +200,15 @@ table(markdown_data$Stroke, markdown_data$Smoker, markdown_data$Diabetes_binary,
       dnn = c("Stroke", "Smoker", "Diabetes"))
 ```
 
-Next, we can explore the gender and age of the individual.
+Next, we can explore the age of the individual. The first one is a proportion table.
 ```{r}
-table(markdown_data$Age, markdown_data$Diabetes_binary,  
-      dnn = c("Age", "Diabetes"))
+prop.table(table(markdown_data$Age, markdown_data$Diabetes_binary,  
+      dnn = c("Age", "Diabetes")))
 
 
-table(markdown_data$Sex, markdown_data$Diabetes_binary,  
-      dnn = c("Sex", "Diabetes"))
+table(markdown_data$Age, markdown_data$Diabetes_binary, 
+                 markdown_data$PhysActivity, 
+      dnn = c("Age", "Diabetes", "Physical Activity"))
 ```
 
 
@@ -200,6 +221,8 @@ ggplot(markdown_data, aes(x=BMI, y=Age, col=Diabetes_binary)) +
   geom_point() +
   xlab("Body Mass Index (BMI)") +
   ylab("Age") +
+  scale_color_brewer(palette = "Dark2") +
+  labs(color="Diabetes") + 
   theme_bw() 
 
 ```
@@ -212,12 +235,16 @@ ggplot(markdown_data, aes(x=BMI, y=PhysActivity, col=Diabetes_binary)) +
   geom_point() +
   xlab("Body Mass Index (BMI)") +
   ylab("Participates In Physical Activity") +
+  scale_color_brewer(palette = "Dark2") +
+  labs(color="Diabetes") + 
   theme_bw() 
 
 ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) + 
   geom_point() +
   xlab("Body Mass Index (BMI)") +
   ylab("Fruit Intake") +
+  scale_color_brewer(palette = "Dark2") +
+  labs(color="Diabetes") + 
   theme_bw() 
 
 
@@ -225,7 +252,33 @@ ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) +
   geom_point() +
   xlab("Body Mass Index (BMI)") +
   ylab("Vegetable Intake") +
-  theme_bw() 
+  scale_color_brewer(palette = "Dark2") +
+  labs(color="Diabetes") + 
+  theme_bw()
+
+```
+Finally, we can view a few count plots that explore Sex and Age across the dataset.
+
+```{r}
+
+ggplot(markdown_data, aes(x = Sex, col = Age)) +        
+  geom_bar(position = "dodge", fill = "lightgray") +
+  xlab("Gender") +
+  ylab("Count") +
+  theme_bw()
+
+ggplot(markdown_data, aes(x = Sex)) +        
+  geom_bar(fill = "lightgray", col = "black") +
+  facet_grid(~ Diabetes_binary) +
+  xlab("Body Mass Index (BMI)") +
+  ylab("Count") +
+  theme_bw() + theme(
+   strip.background = element_rect(
+     color="black", fill="lightblue", size=1, linetype="solid"
+     ) 
+   ) +
+  geom_text(stat='count', aes(label= after_stat(count)), vjust=1)
+
 
 ```
 
@@ -264,8 +317,7 @@ Log Loss is one of many metrics available to evaluate classification models. The
 We may prefer Log Loss to accuracy given it's more complex relation with the entire model. Accuracy simply determines how well our model classified data correctly and only cares about the observed class. Accuracy does not take into account the probability/uncertainty associated with the prediction like Log Loss does. 
 
 ### Logistic Regression
-*would like to improve this section*
-Logistic Regression is primarily used in binary classification tasks where we are trying to classify a response variable with two outcomes. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. 
+Logistic Regression is primarily used in binary classification tasks where we are trying to classify a response variable with two outcomes. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. This model links the linear form of the model to the mean (the aforementioned average number of success for a given x).
 
 We fit three models here. The first includes all the variables of interest. The second model removes diet items such as the Fruits and Veggies variables, along with the Stroke variable. The third model includes interaction terms between Age and Sex, Smoker and Stroke, and BMI and PhysActivity.
 
@@ -366,13 +418,16 @@ Linear Discriminant Analysis essentially works by finding the best linear combin
 lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "lda", trControl = ctrl, metric = "logLoss")
 ```
 
-
-
-
 # Final Model Selection
 Here we will choose the best model based on Log Loss.
 
 ```{r}
+# Make our predictions with test set
+LogisticPredicts <- predict(logistic_best_model, newdata = test)
+LassoPredicts <- predict(lasso_model, newdata = test)
+ClassTreePredicts <- predict(classification_tree_model, newdata = test)
+RandomForestPredicts <- predict(naive_bayes_model, newdata = test)
+LDAPredicts <- predict(lda_model, newdata = test)
 
 ```
 
