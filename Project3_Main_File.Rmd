@@ -404,7 +404,7 @@ A Random Forest creates multiple bagged trees then averages the results. For eac
 
 ```{r}
 # Training Random Forest Model
-random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 1:5), trControl = ctrl, metric = "logLoss")
+random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 2:4), trControl = ctrl, metric = "logLoss")
 ```
 
 
