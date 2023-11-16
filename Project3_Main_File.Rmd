@@ -491,8 +491,6 @@ This is for rendering all five docs (ignore for now)
 
 ```
 
-```{r}
 
-```
 
 
