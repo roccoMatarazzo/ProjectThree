@@ -171,7 +171,7 @@ markdown_data$Diabetes_binary <- factor(markdown_data$Diabetes_binary)
 This section is where we will begin Exploratory Data Analysis (EDA). There are several techniques when conducting an EDA, including finding summary statistics and plotting various items from the dataset to potentially identify patterns or relationships within the data.
 
 ### Summary Statistics
-First, we will view summary statistics based on our dataset. The only numerical summary we can acquire from the dataset is for BMI. Every other variable is of the categorical nature.
+First, we will view summary statistics based on our dataset. The only numerical summary we can acquire from the dataset is for BMI. Every other variable is of the categorical nature. The IQR and Standard Deviation are also calculated for BMI in addition to the general summary statistics.
 ```{r}
 # Five Number Summary
 summary(markdown_data$BMI)
@@ -185,7 +185,7 @@ paste("The Standard Deviation for BMI is:", round(sd(summary(markdown_data$BMI))
 
 
 ### Contingency Tables
-This opening bit will focus on HighBP, HighChol, Smoker, and Stroke. All four of these variables can imply poor health in comparison to not being associated with these variables.
+This opening bit will focus on HighBP, HighChol, Smoker, and Stroke. All four of these variables can imply poor health in comparison to not being associated with these variables. For the tables below, we are looking at three-way contingency tables. The first contingency table looks at frequency of having HighBP and HighChol for people with and without diabetes. The second contingency looks at frequency of Stroke and being a Smoker for people with and without diabetes.
 
 ```{r}
 table(markdown_data$HighChol, markdown_data$HighBP, markdown_data$Diabetes_binary,  
@@ -196,7 +196,7 @@ table(markdown_data$Stroke, markdown_data$Smoker, markdown_data$Diabetes_binary,
       dnn = c("Stroke", "Smoker", "Diabetes"))
 ```
 
-Next, we can explore the age of the individual. The first table is a proportion table.
+Next, we can explore the age of the individual. The first table is a proportion table which shows the percentage of people who have or do not have diabetes for each age group. The second table is a three-way contingency table which looks at if a person has done physical activity and if they have diabetes or no diabetes for each age group. 
 ```{r}
 prop.table(table(markdown_data$Age, markdown_data$Diabetes_binary,  
       dnn = c("Age", "Diabetes")))
@@ -209,7 +209,7 @@ table(markdown_data$Age, markdown_data$Diabetes_binary,
 
 
 ### Plots
-Next, let's investigate BMI, whether or not a person has diabetes, and Age on a plot. A higher BMI can indicate high body fat, which can lead to health problems such as diabetes. 
+Next, let's investigate BMI, whether or not a person has diabetes, and Age on a plot. A higher BMI can indicate high body fat, which can lead to health problems such as diabetes. The plot just shows Age and BMI in relation with each other and color codes observations by whether or not they have diabetes.
 
 ```{r}
 
@@ -224,7 +224,7 @@ ggplot(markdown_data, aes(x=BMI, y=Age, col=Diabetes_binary)) +
 
 ```
 
-The next plot will display an individual's physical activity and dietary habits in relation to their BMI and whether or not they have diabetes. 
+The next plot will display an individual's physical activity and dietary habits in relation to their BMI and whether or not they have diabetes. The first plot is for Physical Activity, and the next two plots are regarding their intake of Fruits and Vegetables respectively in relation to their BMI and whether they have diabetes. The plot color codes observations based on if individual has diabetes or not for each plot below.
 
 ```{r}
 
@@ -258,7 +258,7 @@ ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) +
 
 ```
 
-Finally, we can view a few count plots that explore Sex and Age across the dataset.
+Finally, we can view a few count plots that explore Sex and Age across the dataset. The first plot here shows the frequency of Males and Females for each age group. The second plot shows the frequency of each gender and if their condition regarding if they have diabetes or not.
 
 ```{r, warning = FALSE}
 
