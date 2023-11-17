@@ -1,7 +1,7 @@
 Diabetes Data Analysis
 ================
 Rocco Matarazzo & Karthik Edupuganti
-2023-11-17
+2023-11-16
 
 # Introduction
 
@@ -350,7 +350,7 @@ ggplot(markdown_data, aes(x=BMI, y=Age, col=Diabetes_binary)) +
   theme_bw() 
 ```
 
-![](MINIMA~1/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](MINIMA~1/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 The next plot will display an individual’s physical activity and dietary
 habits in relation to their BMI and whether or not they have diabetes.
@@ -371,7 +371,7 @@ ggplot(markdown_data, aes(x=BMI, y=PhysActivity, col=Diabetes_binary)) +
   theme_bw() 
 ```
 
-![](MINIMA~1/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](MINIMA~1/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) + 
@@ -384,7 +384,7 @@ ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) +
   theme_bw() 
 ```
 
-![](MINIMA~1/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](MINIMA~1/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) + 
@@ -397,7 +397,7 @@ ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) +
   theme_bw()
 ```
 
-![](MINIMA~1/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](MINIMA~1/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 Finally, we can view a few count plots that explore Sex and Age across
 the dataset. The first plot here shows the frequency of Males and
@@ -413,7 +413,7 @@ ggplot(markdown_data, aes(x = Sex, col = Age)) +
   theme_bw()
 ```
 
-![](MINIMA~1/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](MINIMA~1/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggplot(markdown_data, aes(x = Sex)) +        
@@ -430,7 +430,7 @@ ggplot(markdown_data, aes(x = Sex)) +
   geom_text(stat='count', aes(label= after_stat(count)), vjust=1)
 ```
 
-![](MINIMA~1/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](MINIMA~1/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 # Modeling
 
@@ -668,7 +668,17 @@ logLoss_LDA <- logLoss(as.numeric(test$Diabetes_binary == "Yes"), LDAPredictsPro
 # Storing Log Loss Values into dataframe
 LogLoss_Values <- data.frame(Model = c("Logistic", "Lasso", "Classification Tree", "Random Forest", "Naive Bayes", "LDA"), LogLossValue = c(logLoss_Logistic, logLoss_Lasso, logLoss_ClassTree, logLoss_RandomForest, logLoss_NaiveBayes, logLoss_LDA))
 LogLoss_Values
+```
 
+    ##                 Model LogLossValue
+    ## 1            Logistic    0.5294820
+    ## 2               Lasso    0.5295368
+    ## 3 Classification Tree    0.6036665
+    ## 4       Random Forest    0.5835702
+    ## 5         Naive Bayes    0.5859757
+    ## 6                 LDA    0.5289676
+
+``` r
 # Getting index of most minimum log loss value
 index_best_model <- which.min(LogLoss_Values$LogLossValue)
 
