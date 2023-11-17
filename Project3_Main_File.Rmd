@@ -33,23 +33,15 @@ library(Metrics)
 # 9 Refused (All these records were deleted from the dataset)
 ```
 
-
-
-
 # Introduction
 
 This report serves as an analysis on 2015 dataset with over 250,000 survey responses pertaining to diabetes. The main variable of interest is a binary indicator for diabetes where 1 represents diabetes/prediabetes and 0 represents no diabetes. 
 
-Other variables that supplement our analysis include HighBP, HighChol, BMI, PhysActivity, Fruits, Veggies, Sex, Age, Smoker and Stroke. Each of these are binary variables, except for BMI and Age. BMI represents the individual's Body Mass Index, which can help identify potential health problems by using the person's height and weight. HighBP, HighChol, Smoker, and Stroke are each coded as 1 equals yes, and 0 equals no. For example, an individual that has a value of 1 in each of these categories has high blood pressure, high cholesterol, classifies as a smoker, and has had a stroke in their life. To classify as a smoker in this dataset, an individual must have smoked at least 100 cigarettes within their lifetime at the time of the survey. 
+Other variables that supplement our analysis include HighBP, HighChol, BMI, PhysActivity, Fruits, Veggies, Sex, Age, Smoker and Stroke. Each of these are binary variables, except for BMI and Age. BMI represents the individual's Body Mass Index, which can help identify potential health problems using the person's height and weight. HighBP, HighChol, Smoker, and Stroke are each coded as 1 equals yes, and 0 equals no. For example, an individual that has a value of 1 in each of these categories has high blood pressure, high cholesterol, classifies as a smoker, and has had a stroke in their life. To classify as a smoker in this dataset, an individual must have smoked at least 100 cigarettes within their lifetime at the time of the survey. 
 
 Just as the variables listed above, PhysActivity, Fruits, and Veggies are another set of yes (1) and no (0) variables. PhysActivity represents whether or not the individual exercised within the last month at the time of survey, other than their regular job. Fruits and veggies determine whether the individual has at least one fruit or vegetable per day. A value of 1 in each of these categories would imply a rather healthy lifestyle. Finally, Sex represents the gender of the individual -- 1 for male and 0 for female -- and Age has several splits, but ultimately ranges from 18 years old to 80 or older. If you are interested in more information about the dataset, please visit the following [link.](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/)
 
-
-
-#### TO DO FINISH
-*describes the purpose of your EDA and modeling, along with the end result you will be creating.*
-
-Our Exploratory Data Analysis (EDA) attempts to discover patterns and relationships within our data among the variables of interest. It was difficult to create several distinct plots given the heavy number of categorical variables. Contingency tables and bar plots served crucial in this section. The modeling section explores several different options before settling on a final model. The final model is best in terms of predictive purposes. 
+Our Exploratory Data Analysis (EDA) attempts to discover patterns and relationships within our data among the variables of interest. It was difficult to create several distinct plots given the heavy number of categorical variables. Contingency tables and bar plots served crucial in this section. Each of these really further understanding of the dataset and even display relationships between variables. The modeling section explores several different model options before settling on a final model Each model is reasonable for a binary target variable, like diabetes, but each have their own distinct method that make them unique. The purpose of modeling is to find a model that is good at predicting the target variable of interest. The final model is best in terms of Log Loss, which is discussed in the Modeling section.
 
 The final output for this project is five individual analyses on each level of education, which are discussed further in the data section. 
 
@@ -204,7 +196,7 @@ table(markdown_data$Stroke, markdown_data$Smoker, markdown_data$Diabetes_binary,
       dnn = c("Stroke", "Smoker", "Diabetes"))
 ```
 
-Next, we can explore the age of the individual. The first one is a proportion table.
+Next, we can explore the age of the individual. The first table is a proportion table.
 ```{r}
 prop.table(table(markdown_data$Age, markdown_data$Diabetes_binary,  
       dnn = c("Age", "Diabetes")))
@@ -261,6 +253,7 @@ ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) +
   theme_bw()
 
 ```
+
 Finally, we can view a few count plots that explore Sex and Age across the dataset.
 
 ```{r, warning = FALSE}
@@ -292,14 +285,6 @@ ggplot(markdown_data, aes(x = Sex)) +
 In this section we will fit several models on our dataset with the predictor being the aforementioned binary diabetes variable. First, we'll split our data into a training and testing set. 
 
 ```{r}
-# # set seed for reproducible purposes
-# set.seed(1234)
-# 
-# # actually splitting the data
-# # the 0.7 at the end implies 70% of data goes into the training set
-# train <- sample(1:nrow(markdown_data), size = nrow(markdown_data)*0.70)
-# # the test set will be the rows from markdown_data not in the training set
-# test <- dplyr::setdiff(1:nrow(markdown_data), train)
 
 # Set seed for reproducible purposes
 set.seed(1234)
@@ -321,22 +306,32 @@ Log Loss is one of many metrics available to evaluate classification models. The
 We may prefer Log Loss to accuracy given it's more complex relation with the entire model. Accuracy simply determines how well our model classified data correctly and only cares about the observed class. Accuracy does not take into account the probability/uncertainty associated with the prediction like Log Loss does. 
 
 ### Logistic Regression
-Logistic Regression is primarily used in binary classification tasks where we are trying to classify a response variable with two outcomes. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. This model links the linear form of the model to the mean (the aforementioned average number of success for a given x).
+Logistic Regression is primarily used in binary classification tasks where we are trying to classify a response variable with two outcomes. Logistic Regression has no linearity assumptions, which can be a benefit when we're dealing with a binary target variable like diabetes. We are able to model the average number of success for a given x, or rather the average number of "yes" answers for the given slate of variables in this instance. This model links the linear form of the model to the mean (the previously mentioned average number of success for a given x).
 
 We fit three models here. The first includes all the variables of interest. The second model removes diet items such as the Fruits and Veggies variables, along with the Stroke variable. The third model includes interaction terms between Age and Sex, Smoker and Stroke, and BMI and PhysActivity.
 
 ```{r}
 # 5-fold cross-validation for each method using LogLoss as summary function
-ctrl <- trainControl(method = "cv", classProbs = TRUE ,number = 5, summaryFunction = mnLogLoss)
+ctrl <- trainControl(method = "cv", classProbs = TRUE ,number = 5, 
+                     summaryFunction = mnLogLoss)
 
 # Model 1, all variables
-logistic_model_1 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+logistic_model_1 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + 
+                            Fruits + Veggies + Sex + Age + Smoker + Stroke, 
+                          data = train, method = "glm", family = "binomial", 
+                          trControl = ctrl, metric = "logLoss")
 
 # Model 2, removing Fruits, Veggies, and Stroke
-logistic_model_2 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Sex + Age + Smoker, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+logistic_model_2 <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + 
+                            Sex + Age + Smoker, data = train, method = "glm",
+                          family = "binomial", trControl = ctrl, 
+                          metric = "logLoss")
 
 # Model 3, adding interactions
-logistic_model_3 <- train(Diabetes_binary ~ HighBP + HighChol + BMI*PhysActivity + Age*Sex + Smoker*Stroke, data = train, method = "glm", family = "binomial", trControl = ctrl, metric = "logLoss")
+logistic_model_3 <- train(Diabetes_binary ~ HighBP + HighChol + BMI*PhysActivity + 
+                            Age*Sex + Smoker*Stroke, data = train, 
+                          method = "glm", family = "binomial", trControl = ctrl, 
+                          metric = "logLoss")
 
 paste("The lowest log loss among these models is:",
       round(min(
@@ -406,7 +401,7 @@ A Random Forest creates multiple bagged trees then averages the results. For eac
 # Training Random Forest Model, used number of trees 
 random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 2:4), trControl = ctrl, metric = "logLoss", ntree = 100)
 ```
-
+*Number of trees limited to 100 (rather than default of 500) to save computing time*
 
 ### Non-Class Model #1 - Naive Bayes Classifer
 
@@ -427,8 +422,6 @@ Linear Discriminant Analysis essentially works by finding the best linear combin
 # Training LDA model
 lda_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "lda", trControl = ctrl, metric = "logLoss")
 ```
-
-
 
 # Final Model Selection
 Here we will choose the best model based on logLoss. The model with the lowest logLoss is  chosen as the best model. 
@@ -507,7 +500,3 @@ apply(reports, MARGIN = 1,
       })
 
 ```
-
-
-
-
