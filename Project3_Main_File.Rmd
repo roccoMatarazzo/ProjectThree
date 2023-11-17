@@ -219,6 +219,7 @@ ggplot(markdown_data, aes(x=BMI, y=Age, col=Diabetes_binary)) +
   ylab("Age") +
   scale_color_brewer(palette = "Dark2") +
   labs(color="Diabetes") + 
+  ggtitle("Age and BMI In Relation to Diabetes Condition") +
   theme_bw() 
 
 ```
@@ -233,6 +234,7 @@ ggplot(markdown_data, aes(x=BMI, y=PhysActivity, col=Diabetes_binary)) +
   ylab("Participates In Physical Activity") +
   scale_color_brewer(palette = "Dark2") +
   labs(color="Diabetes") + 
+  ggtitle("Physical Activity and BMI In Relation to Diabetes Condition") +
   theme_bw() 
 
 ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) + 
@@ -241,6 +243,7 @@ ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) +
   ylab("Fruit Intake") +
   scale_color_brewer(palette = "Dark2") +
   labs(color="Diabetes") + 
+  ggtitle("Fruit Intake and BMI In Relation to Diabetes Condition") +
   theme_bw() 
 
 
@@ -250,6 +253,7 @@ ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) +
   ylab("Vegetable Intake") +
   scale_color_brewer(palette = "Dark2") +
   labs(color="Diabetes") + 
+  ggtitle("Vegetable Intake and BMI In Relation to Diabetes Condition") +
   theme_bw()
 
 ```
@@ -262,18 +266,20 @@ ggplot(markdown_data, aes(x = Sex, col = Age)) +
   geom_bar(position = "dodge", fill = "lightgray") +
   xlab("Gender") +
   ylab("Count") +
+  ggtitle("Gender and Age of Individuals") +
   theme_bw()
 
 ggplot(markdown_data, aes(x = Sex)) +        
   geom_bar(fill = "lightgray", col = "black") +
   facet_grid(~ Diabetes_binary) +
-  xlab("Body Mass Index (BMI)") +
+  xlab("Gender") +
   ylab("Count") +
   theme_bw() + theme(
    strip.background = element_rect(
      color="black", fill="lightblue", size=1, linetype="solid"
      ) 
    ) +
+  ggtitle("Frequency of Gender in Relation to Diabetes Condition") +
   geom_text(stat='count', aes(label= after_stat(count)), vjust=1)
 
 

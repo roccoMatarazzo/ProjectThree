@@ -9,6 +9,8 @@ The R Packages used are as follows:
 - rsample 
 - naivebayes
 - MASS
+- ggcorrplot 
+- Metrics
 
 ### Generated Analyses
 The analysis for the following files are...
