@@ -1,7 +1,7 @@
 Diabetes Data Analysis
 ================
 Rocco Matarazzo & Karthik Edupuganti
-2023-11-16
+2023-11-17
 
 # Introduction
 
@@ -668,17 +668,7 @@ logLoss_LDA <- logLoss(as.numeric(test$Diabetes_binary == "Yes"), LDAPredictsPro
 # Storing Log Loss Values into dataframe
 LogLoss_Values <- data.frame(Model = c("Logistic", "Lasso", "Classification Tree", "Random Forest", "Naive Bayes", "LDA"), LogLossValue = c(logLoss_Logistic, logLoss_Lasso, logLoss_ClassTree, logLoss_RandomForest, logLoss_NaiveBayes, logLoss_LDA))
 LogLoss_Values
-```
 
-    ##                 Model LogLossValue
-    ## 1            Logistic    0.4033424
-    ## 2               Lasso    0.4037779
-    ## 3 Classification Tree    0.4298699
-    ## 4       Random Forest    0.6701102
-    ## 5         Naive Bayes    0.8866412
-    ## 6                 LDA    0.4051683
-
-``` r
 # Getting index of most minimum log loss value
 index_best_model <- which.min(LogLoss_Values$LogLossValue)
 

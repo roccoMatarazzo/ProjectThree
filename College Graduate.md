@@ -668,17 +668,7 @@ logLoss_LDA <- logLoss(as.numeric(test$Diabetes_binary == "Yes"), LDAPredictsPro
 # Storing Log Loss Values into dataframe
 LogLoss_Values <- data.frame(Model = c("Logistic", "Lasso", "Classification Tree", "Random Forest", "Naive Bayes", "LDA"), LogLossValue = c(logLoss_Logistic, logLoss_Lasso, logLoss_ClassTree, logLoss_RandomForest, logLoss_NaiveBayes, logLoss_LDA))
 LogLoss_Values
-```
 
-    ##                 Model LogLossValue
-    ## 1            Logistic    0.2620372
-    ## 2               Lasso    0.2620860
-    ## 3 Classification Tree    0.2759278
-    ## 4       Random Forest    0.4521861
-    ## 5         Naive Bayes    0.8391251
-    ## 6                 LDA    0.2652441
-
-``` r
 # Getting index of most minimum log loss value
 index_best_model <- which.min(LogLoss_Values$LogLossValue)
 
