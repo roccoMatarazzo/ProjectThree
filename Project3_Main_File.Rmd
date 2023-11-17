@@ -394,7 +394,7 @@ A classification tree is used when our goal is to classify group membership, in 
 
 ```{r}
 # Training Classification Tree Model
-classification_tree_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rpart", tuneGrid = expand.grid(cp = seq(0,1, by = 0.001)), trControl = ctrl, metric = "logLoss")
+classification_tree_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rpart", tuneGrid = expand.grid(cp = seq(0,1, by = 0.01)), trControl = ctrl, metric = "logLoss")
 ```
 
 
@@ -403,8 +403,8 @@ classification_tree_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + P
 A Random Forest creates multiple bagged trees then averages the results. For each tree a random subset of predictors is chosen to fit the tree. This way, a single strong predictor won't dominate the tree fits as it will be left out of some of the other trees by random chance. We might choose the Random Forest over the Classification Tree because the Random Forest is typically stronger in prediction. Due to averaging over a large number of tree fits the variance decreases and prediction improves.
 
 ```{r}
-# Training Random Forest Model
-random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 2:4), trControl = ctrl, metric = "logLoss")
+# Training Random Forest Model, used number of trees 
+random_forest_model <- train(Diabetes_binary ~ HighBP + HighChol + BMI + PhysActivity + Fruits + Veggies + Sex + Age + Smoker + Stroke, data = train, method = "rf", tuneGrid = expand.grid(mtry = 2:4), trControl = ctrl, metric = "logLoss", ntree = 100)
 ```
 
 
@@ -442,6 +442,23 @@ RandomForestPredictsProb <- predict(random_forest_model, newdata = test, type = 
 BayesPredictsProb        <- predict(naive_bayes_model, newdata = test, type = "prob")
 LDAPredictsProb         <- predict(lda_model, newdata = test, type = "prob")
 
+
+# Function to account for cases in probability where its either 0 or 1.
+
+Edit_Predictions <- function(predicted_probabilities) {
+  predicted_probabilities$No <- ifelse(predicted_probabilities$No == 0, 0.001, ifelse(predicted_probabilities$No == 1, 0.999, predicted_probabilities$No))
+  predicted_probabilities$Yes <- ifelse(predicted_probabilities$Yes == 0, 0.001, ifelse(predicted_probabilities$Yes == 1, 0.999, predicted_probabilities$Yes))
+  return(predicted_probabilities)
+}
+
+# Calling function
+LogisticPredictsProb <- Edit_Predictions(LogisticPredictsProb)
+LassoPredictsProb <- Edit_Predictions(LassoPredictsProb)
+ClassTreePredictsProb <- Edit_Predictions(ClassTreePredictsProb)
+RandomForestPredictsProb <- Edit_Predictions(RandomForestPredictsProb)
+BayesPredictsProb <- Edit_Predictions(BayesPredictsProb)
+LDAPredictsProb <-Edit_Predictions(LDAPredictsProb)
+
 # Calculating log loss values
 logLoss_Logistic <- logLoss(as.numeric(test$Diabetes_binary == "Yes"), LogisticPredictsProb$Yes)
 logLoss_Lasso <- logLoss(as.numeric(test$Diabetes_binary == "Yes"), LassoPredictsProb$Yes)
@@ -465,29 +482,29 @@ cat("The best model is", LogLoss_Values$Model[index_best_model], "with value of"
 # Automation (Ignore for now)
 This is for rendering all five docs (ignore for now)
 ```{r, eval=FALSE}
-# # Setting Education Levels vector
-# education_levels <- (c("Minimal Schooling", # dataset value = 1/2
-#                       "Some High School", # dataset value = 3
-#                       "High School Graduate", # dataset value = 4
-#                       "Some College", # dataset value = 5
-#                       "College Graduate")) # dataset value = 6
-# 
-# # adding the .html to each
-# output_file <- paste0(education_levels, ".md")
-# 
-# params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
-# 
-# # finalizing and combining it in a tibble
-# reports <- tibble(output_file, params)
-# 
-# # now we can apply! 
-# apply(reports, MARGIN = 1,
-#       FUN = function(x){
-#         render(input = "Project3_Main_File.rmd",
-#                output_file = x[[1]],
-#                output_format = "github_document",
-#                params = x[[2]])
-#       })
+#  Setting Education Levels vector
+education_levels <- (c("Minimal Schooling", # dataset value = 1/2
+                       "Some High School", # dataset value = 3
+                       "High School Graduate", # dataset value = 4
+                      "Some College", # dataset value = 5
+                      "College Graduate")) # dataset value = 6
+
+# adding the .html to each
+output_file <- paste0(education_levels, ".md")
+
+params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
+
+# finalizing and combining it in a tibble
+reports <- tibble(output_file, params)
+
+# now we can apply!
+apply(reports, MARGIN = 1,
+      FUN = function(x){
+        render(input = "Project3_Main_File.rmd",
+               output_file = x[[1]],
+               output_format = "github_document",
+               params = x[[2]])
+      })
 
 ```
 
