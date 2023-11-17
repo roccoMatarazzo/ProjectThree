@@ -494,7 +494,7 @@ output_file <- paste0(education_levels, ".md")
 params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
 
 # finalizing and combining it in a tibble
-reports <- tibble(output_file, params)
+reports <- tibble(output_file, params) 
 
 # now we can apply!
 apply(reports, MARGIN = 1,
