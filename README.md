@@ -13,7 +13,12 @@ The R Packages used are as follows:
 - Metrics
 
 ### Generated Analyses
-The analysis for the following files are...
+The analysis for the following files are:
+1. [Minimal Schooling](https://roccomatarazzo.github.io/ProjectThree/Minimal%20Schooling.html)
+2. [Some High School](https://roccomatarazzo.github.io/ProjectThree/Some%20High%20School.html)
+3. [High School Graduate](https://roccomatarazzo.github.io/ProjectThree/High%20School%20Graduate.html)
+4. [Some College](https://roccomatarazzo.github.io/ProjectThree/Some%20College.html)
+5. [College Graduate](https://roccomatarazzo.github.io/ProjectThree/College%20Graduate.html)
 
 ### Automated Report Code
 The code used to render five individual reports based on parameters is as follows:
