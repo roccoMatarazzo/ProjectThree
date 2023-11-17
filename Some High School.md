@@ -350,7 +350,7 @@ ggplot(markdown_data, aes(x=BMI, y=Age, col=Diabetes_binary)) +
   theme_bw() 
 ```
 
-![](Some%20High%20School_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](SOMEHI~1/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 The next plot will display an individual’s physical activity and dietary
 habits in relation to their BMI and whether or not they have diabetes.
@@ -371,7 +371,7 @@ ggplot(markdown_data, aes(x=BMI, y=PhysActivity, col=Diabetes_binary)) +
   theme_bw() 
 ```
 
-![](Some%20High%20School_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](SOMEHI~1/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) + 
@@ -384,7 +384,7 @@ ggplot(markdown_data, aes(x=BMI, y=Fruits, col=Diabetes_binary)) +
   theme_bw() 
 ```
 
-![](Some%20High%20School_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](SOMEHI~1/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) + 
@@ -397,7 +397,7 @@ ggplot(markdown_data, aes(x=BMI, y=Veggies, col=Diabetes_binary)) +
   theme_bw()
 ```
 
-![](Some%20High%20School_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](SOMEHI~1/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 Finally, we can view a few count plots that explore Sex and Age across
 the dataset. The first plot here shows the frequency of Males and
@@ -413,7 +413,7 @@ ggplot(markdown_data, aes(x = Sex, col = Age)) +
   theme_bw()
 ```
 
-![](Some%20High%20School_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](SOMEHI~1/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggplot(markdown_data, aes(x = Sex)) +        
@@ -430,7 +430,7 @@ ggplot(markdown_data, aes(x = Sex)) +
   geom_text(stat='count', aes(label= after_stat(count)), vjust=1)
 ```
 
-![](Some%20High%20School_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](SOMEHI~1/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 # Modeling
 
@@ -668,7 +668,17 @@ logLoss_LDA <- logLoss(as.numeric(test$Diabetes_binary == "Yes"), LDAPredictsPro
 # Storing Log Loss Values into dataframe
 LogLoss_Values <- data.frame(Model = c("Logistic", "Lasso", "Classification Tree", "Random Forest", "Naive Bayes", "LDA"), LogLossValue = c(logLoss_Logistic, logLoss_Lasso, logLoss_ClassTree, logLoss_RandomForest, logLoss_NaiveBayes, logLoss_LDA))
 LogLoss_Values
+```
 
+    ##                 Model LogLossValue
+    ## 1            Logistic    0.4787420
+    ## 2               Lasso    0.4810843
+    ## 3 Classification Tree    0.5534693
+    ## 4       Random Forest    0.5499946
+    ## 5         Naive Bayes    0.7694749
+    ## 6                 LDA    0.4823132
+
+``` r
 # Getting index of most minimum log loss value
 index_best_model <- which.min(LogLoss_Values$LogLossValue)
 
@@ -677,33 +687,3 @@ cat("The best model is", LogLoss_Values$Model[index_best_model], "with value of"
 ```
 
     ## The best model is Logistic with value of 0.478742
-
-# Automation (Ignore for now)
-
-This is for rendering all five docs (ignore for now)
-
-``` r
-#  Setting Education Levels vector
-education_levels <- (c("Minimal Schooling", # dataset value = 1/2
-                       "Some High School", # dataset value = 3
-                       "High School Graduate", # dataset value = 4
-                      "Some College", # dataset value = 5
-                      "College Graduate")) # dataset value = 6
-
-# adding the .html to each
-output_file <- paste0(education_levels, ".md")
-
-params = lapply(education_levels, FUN = function(x){list(eduLevel = x)})
-
-# finalizing and combining it in a tibble
-reports <- tibble(output_file, params)
-
-# now we can apply!
-apply(reports, MARGIN = 1,
-      FUN = function(x){
-        render(input = "Project3_Main_File.rmd",
-               output_file = x[[1]],
-               output_format = "github_document",
-               params = x[[2]])
-      })
-```
